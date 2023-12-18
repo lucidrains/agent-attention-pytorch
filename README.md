@@ -39,10 +39,10 @@ assert out.shape == x.shape
 
 ```bibtex
 @inproceedings{Han2023AgentAO,
-	title 	= {Agent Attention: On the Integration of Softmax and Linear Attention},
-	author 	= {Dongchen Han and Tianzhu Ye and Yizeng Han and Zhuofan Xia and Shiji Song and Gao Huang},
-	year 	= {2023},
-	url 	= {https://api.semanticscholar.org/CorpusID:266210414}
+    title   = {Agent Attention: On the Integration of Softmax and Linear Attention},
+    author  = {Dongchen Han and Tianzhu Ye and Yizeng Han and Zhuofan Xia and Shiji Song and Gao Huang},
+    year    = {2023},
+    url     = {https://api.semanticscholar.org/CorpusID:266210414}
 }
 ```
 
