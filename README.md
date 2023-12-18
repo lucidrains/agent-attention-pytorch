@@ -20,16 +20,17 @@ $ pip install agent-attention-pytorch
 import torch
 from agent_attention_pytorch import AgentSelfAttention
 
-x = torch.randn(2, 65536, 512)
-
 attn = AgentSelfAttention(
     dim = 512,
-    num_agent_tokens = 256,
-    dim_head = 64,
-    heads = 8
+    num_agent_tokens = 256,       # number of "agent" tokens
+    dim_head = 64,                # attention head dimension
+    heads = 8                     # number of heads
 )
 
-out = attn(x)
+x = torch.randn(2, 65536, 512)
+mask = torch.ones(2, 65536).bool()
+
+out = attn(x, mask = mask)
 
 assert out.shape == x.shape
 ```
