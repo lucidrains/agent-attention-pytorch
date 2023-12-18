@@ -8,6 +8,32 @@ This work seems to be an elegant simplification of <a href="https://github.com/l
 
 This repository will add support for variable sequence lengths (masking) and post-softmax talking heads.
 
+## Install
+
+```bash
+$ pip install agent-attention-pytorch
+```
+
+## Usage
+
+```python
+import torch
+from agent_attention_pytorch import AgentSelfAttention
+
+x = torch.randn(2, 65536, 512)
+
+attn = AgentSelfAttention(
+    dim = 512,
+    num_agent_tokens = 256,
+    dim_head = 64,
+    heads = 8
+)
+
+out = attn(x)
+
+assert out.shape == x.shape
+```
+
 ## Citations
 
 ```bibtex
