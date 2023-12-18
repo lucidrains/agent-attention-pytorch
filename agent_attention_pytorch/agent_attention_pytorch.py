@@ -56,13 +56,18 @@ class AgentSelfAttention(Module):
     def forward(
         self,
         x,
-        mask = None
+        mask = None,
+        agent_tokens = None,
+        return_agent_tokens = False
     ):
         batch = x.shape[0]
 
         q, k, v = self.to_qkv(x)
 
-        a = repeat(self.agent_tokens, 'h m d -> b h m d', b = batch)
+        if exists(agent_tokens):
+            a = agent_tokens
+        else:
+            a = repeat(self.agent_tokens, 'h m d -> b h m d', b = batch)
 
         a = a * self.scale
 
@@ -82,8 +87,9 @@ class AgentSelfAttention(Module):
         qa_attn = self.qa_talking_heads(qa_attn)
         ak_attn = self.ak_talking_heads(ak_attn)
 
-        out = einsum('b h i j, b h j d -> b h i d', ak_attn, v)
-        out = einsum('b h i j, b h j d -> b h i d', qa_attn, out)
+        agent_gathered_tokens = einsum('b h i j, b h j d -> b h i d', ak_attn, v)
+
+        out = einsum('b h i j, b h j d -> b h i d', qa_attn, agent_gathered_tokens)
 
         if exists(mask):
             out = out.masked_fill(~rearrange(mask, 'b n -> b 1 n 1'), 0.)
@@ -91,4 +97,9 @@ class AgentSelfAttention(Module):
         if exists(self.to_gates):
             out = out * self.to_gates(x)
 
-        return self.to_out(out)
+        out = self.to_out(out)
+
+        if not return_agent_tokens:
+            return out
+
+        return out, agent_gathered_tokens
