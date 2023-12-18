@@ -54,10 +54,17 @@ class AgentSelfAttention(Module):
         qa_sim = einsum('b h i d, b h j d -> b h i j', q, a)
         ak_sim = einsum('b h i d, b h j d -> b h i j', a, k)
 
+        if exists(mask):
+            max_neg_value = -torch.finfo(qa_sim.dtype).max
+            ak_sim = ak_sim.masked_fill(~rearrange(mask, 'b j -> b 1 1 j'), max_neg_value)
+
         qa_attn = qa_sim.softmax(dim = -1)
         ak_attn = ak_sim.softmax(dim = -1)
 
         out = einsum('b h i j, b h j d -> b h i d', ak_attn, v)
         out = einsum('b h i j, b h j d -> b h i d', qa_attn, out)
+
+        if exists(mask):
+            out = out.masked_fill(~rearrange(mask, 'b n -> b 1 n 1'), 0.)
 
         return self.to_out(out)
