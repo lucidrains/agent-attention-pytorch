@@ -21,7 +21,8 @@ class AgentSelfAttention(Module):
         dim_head = 64,
         heads = 8,
         dropout = 0.,
-        talking_heads = True
+        talking_heads = True,
+        gate = True
     ):
         super().__init__()
         self.scale = dim_head ** -0.5
@@ -31,6 +32,12 @@ class AgentSelfAttention(Module):
             nn.Linear(dim, dim_inner * 3, bias = False),
             Rearrange('b n (qkv h d) -> qkv b h n d', h = heads, qkv = 3)
         )
+
+        self.to_gates = nn.Sequential(
+            nn.Linear(dim, heads),
+            Rearrange('b n h -> b h n 1'),
+            nn.Sigmoid()
+        ) if gate else None
 
         self.agent_tokens = nn.Parameter(torch.zeros(heads, num_agent_tokens, dim_head))
         nn.init.normal_(self.agent_tokens, std = 0.02)
@@ -80,5 +87,8 @@ class AgentSelfAttention(Module):
 
         if exists(mask):
             out = out.masked_fill(~rearrange(mask, 'b n -> b 1 n 1'), 0.)
+
+        if exists(self.to_gates):
+            out = out * self.to_gates(x)
 
         return self.to_out(out)
