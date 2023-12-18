@@ -1,6 +1,6 @@
 <img src="./agent-attention.png" width="350px"></img>
 
-## Agent Attention - Pytorch (wip)
+## Agent Attention - Pytorch
 
 Implementation of <a href="https://arxiv.org/abs/2312.08874">Agent Attention</a> in Pytorch.
 
