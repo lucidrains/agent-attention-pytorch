@@ -82,7 +82,8 @@ class AgentSelfAttention(Module):
         x,
         *,
         agent_tokens,
-        mask = None
+        mask = None,
+        return_agent_tokens = False
     ):
         x = self.norm(x)
         a = self.norm(agent_tokens)
@@ -128,6 +129,9 @@ class AgentSelfAttention(Module):
         out = self.to_out(out)
         agent_out = self.to_out(agent_out)
 
+        if not return_agent_tokens:
+            return out
+
         return out, agent_out
 
 # transformer
@@ -163,7 +167,12 @@ class AgentTransformer(Module):
                 FeedForward(dim = dim, mult = ff_mult)
             ]))
 
-    def forward(self, x, mask = None):
+    def forward(
+        self,
+        x,
+        mask = None,
+        return_agent_tokens = False
+    ):
         batch = x.shape[0]
         a = repeat(self.agent_tokens, 'm d -> b m d', b = batch)
 
@@ -183,4 +192,7 @@ class AgentTransformer(Module):
 
             a, x = unpack(x, ps, 'b * d')
 
-        return x
+        if not return_agent_tokens:
+            return x
+
+        return x, a
