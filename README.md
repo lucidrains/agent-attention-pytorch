@@ -90,3 +90,14 @@ assert out.shape == x.shape
     url     = {https://api.semanticscholar.org/CorpusID:259224568}
 }
 ```
+
+```bibtex
+@article{Wang2022FoundationT,
+    title   = {Foundation Transformers},
+    author  = {Hongyu Wang and Shuming Ma and Shaohan Huang and Li Dong and Wenhui Wang and Zhiliang Peng and Yu Wu and Payal Bajaj and Saksham Singhal and Alon Benhaim and Barun Patra and Zhun Liu and Vishrav Chaudhary and Xia Song and Furu Wei},
+    journal = {ArXiv},
+    year    = {2022},
+    volume  = {abs/2210.06423},
+    url     = {https://api.semanticscholar.org/CorpusID:252846241}
+}
+```

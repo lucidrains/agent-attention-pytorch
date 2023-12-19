@@ -45,7 +45,8 @@ class AgentSelfAttention(Module):
         heads = 8,
         dropout = 0.,
         talking_heads = True,
-        gate = True
+        gate = True,
+        sub_layernorm = False
     ):
         super().__init__()
         self.scale = dim_head ** -0.5
@@ -71,6 +72,7 @@ class AgentSelfAttention(Module):
         self.ak_dropout = nn.Dropout(dropout)
 
         self.to_out = nn.Sequential(
+            nn.LayerNorm(dim_head) if sub_layernorm else nn.Identity(),
             Rearrange('b h n d -> b n (h d)'),
             nn.Linear(dim_inner, dim, bias = False)
         )
@@ -147,6 +149,7 @@ class AgentTransformer(Module):
         nn.init.normal_(self.agent_tokens, std = 0.02)
 
         self.layers = ModuleList([])
+
         for _ in range(depth):
             self.layers.append(ModuleList([
                 AgentSelfAttention(
