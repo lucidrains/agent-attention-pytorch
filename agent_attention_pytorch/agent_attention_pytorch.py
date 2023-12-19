@@ -22,7 +22,8 @@ class AgentSelfAttention(Module):
         heads = 8,
         dropout = 0.,
         talking_heads = True,
-        gate = True
+        gate = True,
+        combine_agent_tokens = False
     ):
         super().__init__()
         self.scale = dim_head ** -0.5

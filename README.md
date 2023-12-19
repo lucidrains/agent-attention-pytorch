@@ -35,6 +35,29 @@ out = attn(x, mask = mask)
 assert out.shape == x.shape
 ```
 
+For a full fledged linear transformer based on agent tokens, just import `AgentTransformer`
+
+```python
+import torch
+from agent_attention_pytorch import AgentTransformer
+
+transformer = AgentTransformer(
+    dim = 512,
+    depth = 6,
+    num_agent_tokens = 128,
+    dim_head = 64,
+    heads = 8
+)
+
+x = torch.randn(2, 65536, 512)
+mask = torch.ones(2, 65536).bool()
+
+out, agent_tokens = transformer(x, mask = mask)
+
+# (2, 65536, 512), (2, 128, 512)
+assert out.shape == x.shape
+```
+
 ## Citations
 
 ```bibtex
