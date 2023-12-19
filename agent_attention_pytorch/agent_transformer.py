@@ -85,9 +85,9 @@ class AgentSelfAttention(Module):
         mask = None
     ):
         x = self.norm(x)
-        agent_tokens = self.norm(agent_tokens)
+        a = self.norm(agent_tokens)
 
-        x_and_agents, xa_ps = pack([agent_tokens, x], 'b * d')
+        x_and_agents, xa_ps = pack([a, x], 'b * d')
         qkv = self.to_qkv(x_and_agents)
 
         qkv_agent, qkv_input = unpack(qkv, xa_ps, 'qkv b h * d')
@@ -114,18 +114,19 @@ class AgentSelfAttention(Module):
         qa_attn = self.qa_talking_heads(qa_attn)
         ak_attn = self.ak_talking_heads(ak_attn)
 
-        agent_gathered_tokens = einsum('b h i j, b h j d -> b h i d', ak_attn, v)
+        agent_out = einsum('b h i j, b h j d -> b h i d', ak_attn, v)
 
-        out = einsum('b h i j, b h j d -> b h i d', qa_attn, agent_gathered_tokens)
+        out = einsum('b h i j, b h j d -> b h i d', qa_attn, agent_out)
 
         if exists(mask):
             out = out.masked_fill(~rearrange(mask, 'b n -> b 1 n 1'), 0.)
 
         if exists(self.to_gates):
             out = out * self.to_gates(x)
+            agent_out = agent_out * self.to_gates(a)
 
         out = self.to_out(out)
-        agent_out = self.to_out(agent_gathered_tokens)
+        agent_out = self.to_out(agent_out)
 
         return out, agent_out
 

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
   name = 'agent-attention-pytorch',
   packages = find_packages(exclude=[]),
-  version = '0.1.2',
+  version = '0.1.4',
   license='MIT',
   description = 'Agent Attention - Pytorch',
   author = 'Phil Wang',
