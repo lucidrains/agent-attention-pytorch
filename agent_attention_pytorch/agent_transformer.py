@@ -65,7 +65,7 @@ class AgentSelfAttention(Module):
             nn.Sigmoid()
         ) if gate else None
 
-        self.qa_talking_heads = nn.Conv2d(heads, heads, 1, bias = False) if talking_heads else nn.Identity()
+        self.talking_heads = nn.Conv2d(heads, heads, 1, bias = False) if talking_heads else nn.Identity()
         self.ak_talking_heads = nn.Conv2d(heads, heads, 1, bias = False) if talking_heads else nn.Identity()
 
         self.qa_dropout = nn.Dropout(dropout)
@@ -146,6 +146,7 @@ class AgentTransformer(Module):
         heads = 8,
         dim_head = 64,
         ff_mult = 4,
+        final_norm = True,
         **attn_kwargs: dict
     ):
         super().__init__()
@@ -166,6 +167,8 @@ class AgentTransformer(Module):
                 ),
                 FeedForward(dim = dim, mult = ff_mult)
             ]))
+
+        self.final_norm = RMSNorm(dim) if final_norm else None
 
     def forward(
         self,
@@ -191,6 +194,10 @@ class AgentTransformer(Module):
             x = ff(x) + x
 
             a, x = unpack(x, ps, 'b * d')
+
+        if exists(self.final_norm):
+            x = self.final_norm(x)
+            a = self.final_norm(a)
 
         if not return_agent_tokens:
             return x
