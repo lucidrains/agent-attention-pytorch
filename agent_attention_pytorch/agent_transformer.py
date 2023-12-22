@@ -65,11 +65,17 @@ class AgentSelfAttention(Module):
             nn.Sigmoid()
         ) if gate else None
 
-        self.talking_heads = nn.Conv2d(heads, heads, 1, bias = False) if talking_heads else nn.Identity()
+        self.qa_talking_heads = nn.Conv2d(heads, heads, 1, bias = False) if talking_heads else nn.Identity()
         self.ak_talking_heads = nn.Conv2d(heads, heads, 1, bias = False) if talking_heads else nn.Identity()
 
         self.qa_dropout = nn.Dropout(dropout)
         self.ak_dropout = nn.Dropout(dropout)
+
+        self.to_agent_out = nn.Sequential(
+            nn.LayerNorm(dim_head) if sub_layernorm else nn.Identity(),
+            Rearrange('b h n d -> b n (h d)'),
+            nn.Linear(dim_inner, dim, bias = False)
+        )
 
         self.to_out = nn.Sequential(
             nn.LayerNorm(dim_head) if sub_layernorm else nn.Identity(),
@@ -127,7 +133,7 @@ class AgentSelfAttention(Module):
             agent_out = agent_out * self.to_gates(a)
 
         out = self.to_out(out)
-        agent_out = self.to_out(agent_out)
+        agent_out = self.to_agent_out(agent_out)
 
         if not return_agent_tokens:
             return out
@@ -183,7 +189,8 @@ class AgentTransformer(Module):
             attn_out, agent_out = attn(
                 x,
                 agent_tokens = a,
-                mask = mask
+                mask = mask,
+                return_agent_tokens = True
             )
 
             a = a + agent_out
