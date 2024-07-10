@@ -31,8 +31,8 @@ attn = AgentSelfAttention(
     heads = 8                     # number of heads
 )
 
-x = torch.randn(2, 65536, 512)
-mask = torch.ones(2, 65536).bool()
+x = torch.randn(3, 65536, 512)
+mask = torch.ones(3, 65536).bool()
 
 out = attn(x, mask = mask)
 
@@ -53,12 +53,12 @@ transformer = AgentTransformer(
     heads = 8
 )
 
-x = torch.randn(2, 65536, 512)
-mask = torch.ones(2, 65536).bool()
+x = torch.randn(3, 65536, 512)
+mask = torch.ones(3, 65536).bool()
 
-out, agent_tokens = transformer(x, mask = mask)
+out, agent_tokens = transformer(x, mask = mask, return_agent_tokens = True)
 
-# (2, 65536, 512), (2, 128, 512)
+# (3, 65536, 512), (3, 128, 512)
 assert out.shape == x.shape
 ```
 
